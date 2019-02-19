@@ -1,0 +1,8 @@
+
+fuck index -> (0 - 1);
+fuck list -> ['h', 'e', 'l', 'l', 'o'];
+
+while (index += 1) <= 4 {
+    print index;
+    printLine -> list[index];
+}

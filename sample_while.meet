@@ -1,0 +1,11 @@
+
+# 求五十以内能被二整除的数 #
+
+fuck tom -> 0;
+fuck frank -> 50;
+
+while (tom += 1) < frank {
+    if (tom % 2) == 0 {
+        printLine -> tom;
+    }
+}

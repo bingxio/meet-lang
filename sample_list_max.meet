@@ -1,0 +1,34 @@
+
+# 最大最小值 #
+
+fuck list -> [2 76 3 23 99 45 22 91];
+
+fuck i -> 0;
+fuck s -> 8;
+
+fun find => {
+    fuck max -> list[0];
+    fuck min -> list[0];
+
+    for {
+        if list[i] > max {
+            fuck max -> list[i];
+        } else {
+            if list[i] < min {
+                fuck min -> list[i];
+            }
+        }
+
+        if (i += 1) == s {
+            break;
+        }
+    }
+}
+
+fun -> find;
+
+print -> 'max = ';
+printLine -> max;   # max = 99 #
+
+print -> 'min = ';
+printLine -> min;   # min = 2 #

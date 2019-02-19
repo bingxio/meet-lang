@@ -1,0 +1,12 @@
+
+fuck a -> 20;
+
+fun do => {
+    print -> 'this is call function, a = ';
+    printLine -> a;
+
+    fuck a -> 50;
+}
+
+fun -> do;
+fun -> do;

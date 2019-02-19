@@ -1,0 +1,18 @@
+
+# 列表 #
+
+fuck name -> ['meet' 'programming' 'language' '!'];
+
+fuck list -> [2 4 6 8 10];
+fuck listPlus -> (list[3] + list[4]);
+
+forEach -> list;    # meet programming language ! #
+forEach -> name;    # 2 4 6 8 10 #
+
+printLine -> name[0];   # 'meet' #
+printLine -> list[4];   # 10 #
+printLine -> listPlus;  # 18 #
+
+set list[0] -> 6;
+
+forEach -> list;

@@ -1,0 +1,14 @@
+
+# 无限循环 #
+
+fuck a -> 0;
+
+for {
+    printLine -> a;
+
+    if (a += 1) == 10 {
+        printLine -> 'run ok !';
+        
+        break;
+    }
+}

@@ -1,0 +1,53 @@
+
+fuck name -> ['meet' 'programming' 'language'];
+
+fuck list -> [2 4 6 8 10];
+fuck listPlus -> (list[3] + list[4]);
+
+set list[5] -> (list[4] + 2);
+
+forEach -> name;
+forEach -> list;
+
+printLine -> list[4];
+printLine -> listPlus;
+
+printLine 1;
+
+fuck index -> (0 - 1);
+
+# Reassign #
+fuck list -> ['h' 'e' 'l' 'l' 'o'];
+
+while (index += 1) <= 4 {
+    print index;
+    printLine -> list[index];
+}
+
+index ++;
+index --;
+
+printLine 1;
+
+for {
+    print -> 'index = ';
+    printLine -> index;
+
+    if (index -= 1) == 0 {
+        printLine -> 'run ok !';
+        
+        break;
+    }
+}
+
+fuck a -> 20;
+
+fun do => {
+    print -> 'this is call function, a = ';
+    printLine -> a;
+
+    fuck a -> 50;
+}
+
+fun -> do;
+fun -> do;

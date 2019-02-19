@@ -1,0 +1,56 @@
+
+# 排序 #
+
+fuck list -> [23 65 898 3 22 99 88 58 28 93];
+fuck result -> [];
+
+fuck i -> 0;    # 用于遍历列表 #
+fuck s -> 10;   # 用于遍历列表 #
+fuck j -> 0;    # 用于查找最大值 #
+fuck k -> 0;    # 用于清除最大值 #
+
+fun search => {
+    fuck max -> list[0];
+
+    for {
+        if list[j] > max {
+            fuck max -> list[j];
+        } else {
+            if (j += 1) == s {
+                break;
+            }
+        }
+    }
+
+    fuck j -> 0;
+}
+
+fun remove => {
+    for {
+        if max == list[k] {
+            set list[k] -> 0;
+
+            break;
+        }
+
+        k ++;
+    }
+
+    fuck k -> 0;
+}
+
+fun sort => {
+    while i < s {
+        fun -> search;  # 找出最大值 #
+        fun -> remove;  # 清除最大值 #
+
+        set result[i] -> max;
+
+        i ++;
+    }
+}
+
+fun -> sort;
+
+forEach -> list;    # 0 0 0 0 0 0 0 0 0 0 #
+forEach -> result;  # 898 99 93 88 65 58 28 23 22 3 #

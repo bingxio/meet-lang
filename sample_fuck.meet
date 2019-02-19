@@ -1,0 +1,48 @@
+
+# 变量定义和输出 #
+
+fuck a -> 20;
+fuck b -> 'Hello World';
+
+printLine -> a;
+printLine -> b;
+
+fuck a -> (10 - 2);
+
+########################
+
+fuck c -> (2 + 10);
+print -> '2 + 10 = ';
+printLine -> c;
+
+fuck c -> (2 - 10);
+print -> '2 - 10 = ';
+printLine -> c;
+
+fuck c -> (2 * 10);
+print -> '2 * 10 = ';
+printLine -> c;
+
+fuck c -> (2 / 10);
+print -> '2 / 10 = ';
+printLine -> c;
+
+########################
+
+printLine;      # print 1 '\n' #
+printLine 2;    # print 2 '\n' #
+printLine 3;    # print 3 '\n' #
+
+########################
+
+fuck d -> 2;
+
+print d;        # print 2 ' ' #
+print -> 'hello';
+printLine d;    # print 2 '\n' #
+
+fuck a -> [2 4 6 8 10];
+
+fuck a -> a[0];
+
+printLine -> a;

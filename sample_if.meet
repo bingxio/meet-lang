@@ -1,0 +1,19 @@
+
+# 条件语句 #
+
+fuck a -> 20;
+fuck b -> 50;
+
+if a == b {
+    printLine -> 'Equal';
+}
+
+if a > b {
+    print -> 'max is a, ';
+} else {
+    print -> 'max is b, ';
+}
+
+if (a += 30) == b {
+    printLine -> 'oh, plus 30 to equal b.';
+}

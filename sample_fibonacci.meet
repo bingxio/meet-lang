@@ -1,0 +1,23 @@
+
+# 裴波那契数列 #
+
+fuck list -> [1 1];
+  
+fuck a -> 1;
+fuck b -> 20;
+    
+fun fibonacci => {
+  
+    while (a += 1) < b {
+        fuck c -> (a - 1);
+        fuck d -> (a - 2);
+
+        set list[a] -> (list[c] + list[d]);
+    }
+
+    # 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, ... #
+
+    forEach -> list;
+}
+
+fun -> fibonacci;

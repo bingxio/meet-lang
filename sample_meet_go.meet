@@ -1,0 +1,148 @@
+
+fuck meet -> ['meet' 'program' 'language' '!'];
+
+forEach -> meet;
+
+fuck a -> 200;
+
+print -> 'a = ';
+printLine -> a; # 200 #
+
+fuck b -> (a + 100);
+
+print -> 'a + 100 = ';
+printLine -> b;  # 300 #
+
+fuck c -> [2 4 6 8 10 12 14 16 18 20];
+
+print -> 'c = ';
+printLine -> c; # [2 4 6 8 10 12 14 16 18 20] #
+print -> 'c[0] = ';
+printLine -> c[0];  # 2 #
+print -> 'c[9] = ';
+printLine -> c[9];  # 20 #
+
+fuck d -> ('hello, ' + 'meet');
+
+print -> 'd = ';
+printLine -> d; # hello, meet #
+
+fuck d -> (2 * c[0]); 
+
+print -> '2 * c[0] = ';
+printLine -> d; # 4 #
+
+fuck a -> (d > 5);
+
+print -> 'a = ';
+printLine -> a;
+
+fuck a -> (d == c[1]);
+
+print -> 'd == c[1] = ';
+printLine -> a;
+
+printLine -> (2 * 4);
+printLine -> (2 == 2);
+printLine -> (4 > 4);
+
+forEach -> meet;
+forEach -> c;
+
+fuck a -> [];
+fuck b -> [2 3];
+
+set a[0] -> 200;
+set a[999] -> 666;
+# set a[888] -> 'hello'; # # 不能新增不同的数据类型 #
+set a[1] -> (1 + b[1]);
+
+printLine -> a;
+
+forEach -> a;
+
+fuck tom -> 10;
+fuck frank -> 20;
+
+if (tom + 1) <= frank {
+    printLine -> 'tom > frank';
+    printLine -> 'ok !!!';
+
+    tom ++;
+
+    print -> 'tom = ';
+    printLine -> tom;
+    print -> 'frank = ';
+    printLine -> frank;
+} else {
+    if tom == frank {
+        printLine -> 'frank == tom';
+    }
+
+    printLine -> 'frank < tom';
+    printLine -> '小于';
+}
+
+tom ++;
+
+print -> 'tom ++ = ';
+printLine -> tom;
+
+tom --;
+
+print -> 'tom -- = ';
+printLine -> tom;
+
+fuck a -> 0;
+fuck b -> 10;
+
+while (a += 1) < b {
+    print -> 'a = ';
+    printLine -> a;
+}
+
+printLine -> '======';
+
+print -> 'a = ';
+printLine -> a;
+print -> 'b = ';
+printLine -> b;
+
+printLine -> '======';
+
+while a == b {
+    a --;
+
+    printLine -> a;
+    printLine -> b;
+}
+
+print -> '====== ';
+printLine -> 'while statement run end.';
+
+fuck a -> 0;
+
+for {
+    if a != 15 {
+        print -> 'a = ';
+        printLine -> a;
+    } else {
+        break;
+    }
+
+    a ++;
+}
+
+print -> '====== ';
+printLine -> 'for statement run end.';
+
+fun a => {
+    printLine -> 'this is a function.';
+}
+
+fun b => {
+    printLine -> 'this is b function.';
+}
+
+fun -> a;
+fun -> b;

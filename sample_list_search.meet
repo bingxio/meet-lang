@@ -1,0 +1,24 @@
+
+# 查找 #
+
+fuck list -> [23 65 28 44 98 30 24];
+fuck result -> [];
+
+fuck len -> 7;
+fuck i -> 0;
+fuck target -> 98;
+
+fun search => {
+   for {
+        if target == list[i] {
+            print -> 'found, index = ';
+            printLine -> i; # found, index = 4 #
+
+            break;
+        }
+
+        i ++;
+    }
+}
+
+fun -> search;
