@@ -115,3 +115,10 @@ type FunStatement struct {
 	Type      string
 	Establish []interface{}
 }
+
+// ------------------------------------------
+
+type ImportStatement struct {
+	Path      string
+	Establish []interface{}
+}

@@ -41,6 +41,8 @@ func (i *Interpreter) eval() {
 
 func (i *Interpreter) evalForNode(node interface{}) {
 	switch node.(type) {
+	case ast.ImportStatement:
+		i.evalImportStatementNode()
 	case ast.FuckStatement:
 		i.evalFuckStatementNode()
 	case ast.PrintStatement:
@@ -66,6 +68,19 @@ func (i *Interpreter) evalForNode(node interface{}) {
 	default:
 		panic("解释失败，未知类型")
 	}
+}
+
+func (i *Interpreter) evalImportStatementNode() {
+	importStmt := i.node.(ast.ImportStatement)
+	tempCurrent := i.current
+
+	for _, v := range importStmt.Establish {
+		i.node = v
+		i.evalForNode(i.node)
+	}
+
+	i.current = tempCurrent
+	i.current++
 }
 
 func (i *Interpreter) evalFuckStatementNode() {

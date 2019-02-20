@@ -35,8 +35,7 @@ func Start(in io.Reader, out io.Writer, env *environment.Environment) {
 
 		tokens := lexer.New(line)
 
-		parser := parser.New(tokens)
-		ast := parser.ParseProgram()
+		ast := parser.New(tokens).ParseProgram()
 
 		interpreter.Eval(ast, env)
 	}

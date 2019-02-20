@@ -6,6 +6,7 @@ const (
 	LIST_OBJ    = "LIST"
 	BOOL_OBJ    = "BOOL"
 	FUN_OBJ     = "FUN"
+	PACKAGE_OBJ = "PACKAGE"
 )
 
 type ObjectType string

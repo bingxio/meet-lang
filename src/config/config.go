@@ -1,6 +1,6 @@
 package config
 
-const VERSION = "v 0.1.6"
+const VERSION = "v 0.1.7"
 
 const MORE = "\n\t Meet Programming Language REPL " + VERSION + " - Turaiiao 2019 - Email: 1171840237@qq.com \n\n" +
 	"\t github: https://github.com/Turaiiao/meet-lang \n" +

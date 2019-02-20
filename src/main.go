@@ -3,16 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"meet-lang/src/config"
 	"meet-lang/src/environment"
 	"meet-lang/src/interpreter"
 	"meet-lang/src/lexer"
 	"meet-lang/src/parser"
 	"meet-lang/src/repl"
+	"meet-lang/src/util"
 	"os"
 	"os/user"
-	"path"
 )
 
 var env = environment.NewEnvironment()
@@ -47,15 +46,13 @@ func main() {
 		return
 	}
 
-	suffix := path.Ext(shellWithFile)
-
-	if suffix != ".meet" {
+	if !util.Suffix(shellWithFile) {
 		panic("文件仅限 .meet 后缀")
 	} else {
-		code, err := read(shellWithFile)
+		code, err := util.Read(shellWithFile)
 
 		if err != nil {
-			panic("文件打开失败：" + err.Error() + ", path = " + suffix)
+			panic("文件打开失败：" + err.Error() + ", path = " + shellWithFile)
 		}
 
 		eval(string(code), *shellIsShowTokens, *shellIsShowAst, *shellIsShowEnv, *shellIsShowAll)
@@ -72,9 +69,7 @@ func eval(code string, show_token, show_ast, show_env bool, show_all bool) {
 		splitScreen()
 	}
 
-	p := parser.New(l)
-
-	ast := p.ParseProgram()
+	ast := parser.New(l).ParseProgram()
 
 	if show_ast {
 		for k, v := range ast.Statements {
@@ -112,16 +107,6 @@ func eval(code string, show_token, show_ast, show_env bool, show_all bool) {
 			fmt.Printf("k = %s, v = %s \n", k, v)
 		}
 	}
-}
-
-func read(path string) ([]byte, error) {
-	f, err := os.Open(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return ioutil.ReadAll(f)
 }
 
 func splitScreen() {

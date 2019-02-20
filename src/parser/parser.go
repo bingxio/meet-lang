@@ -3,7 +3,9 @@ package parser
 import (
 	"fmt"
 	"meet-lang/src/ast"
+	"meet-lang/src/lexer"
 	"meet-lang/src/token"
+	"meet-lang/src/util"
 	"regexp"
 	"strconv"
 )
@@ -38,6 +40,8 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseWithToken(statements *[]interface{}) {
 	switch p.token.Value {
+	case "import":
+		*statements = append(*statements, *p.parseImportStatement())
 	case "fuck":
 		*statements = append(*statements, *p.parseFuckStatement())
 	case "print":
@@ -103,6 +107,41 @@ func (p *Parser) parseBlockStatement(ast []interface{}) *[]interface{} {
 	p.refreshCurrentToken() // refresh token '}' to next token.
 
 	return &ast
+}
+
+// import 'sample_package.meet' as sample;
+func (p *Parser) parseImportStatement() *ast.ImportStatement {
+	importStmt := &ast.ImportStatement{}
+
+	p.current++
+
+	if p.currentToken().Type != token.STRING {
+		panic("缺少包名")
+	}
+
+	importStmt.Path = p.currentToken().Value
+
+	p.current++
+	p.isSemicolon()
+	p.current++
+	p.refreshCurrentToken()
+
+	if !util.Suffix(importStmt.Path) {
+		panic("文件仅限 .meet 后缀")
+	}
+
+	code, err := util.Read(importStmt.Path)
+
+	if err != nil {
+		panic("文件打开失败：" + err.Error())
+	}
+
+	tokens := lexer.New(string(code))
+	ast := New(tokens).ParseProgram()
+
+	importStmt.Establish = ast.Statements
+
+	return importStmt
 }
 
 // fuck a -> 20;
