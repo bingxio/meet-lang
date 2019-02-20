@@ -1,4 +1,6 @@
 
+import './test/sample_fibonacci.meet'
+
 fuck name -> ['meet' 'programming' 'language'];
 
 fuck list -> [2 4 6 8 10];
@@ -51,3 +53,5 @@ fun do => {
 
 fun -> do;
 fun -> do;
+
+fun -> fibonacci;

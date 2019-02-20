@@ -1,0 +1,6 @@
+
+import './package/while/sample_fibonacci.meet';
+
+print -> '斐波那契数列：';
+
+fun -> fibonacci;

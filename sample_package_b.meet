@@ -1,0 +1,4 @@
+
+import 'sample_package_a.meet';
+
+fun -> a;
