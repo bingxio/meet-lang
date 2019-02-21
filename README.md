@@ -69,6 +69,16 @@ fuck a -> 20;
 # fuck b -> 50; # # Not execute #
 ```
 
+#### Package
+
+You can use import to import a meet file.
+
+```
+import './test/fibonacci.meet';
+
+fun -> fibonacci; # call function for fibonacci.meet #
+```
+
 ### Fuck Identifier
 
 ```
