@@ -91,6 +91,12 @@ func (i *Interpreter) evalImportStatementNode() {
 func (i *Interpreter) evalFuckStatementNode() {
 	fuckStmt := i.node.(ast.FuckStatement)
 
+	if !i.isBreakForStatement {
+		if _, has := i.env.Get(fuckStmt.Name); has {
+			panic("此变量已经声明：" + fuckStmt.Name)
+		}
+	}
+
 	if fuckStmt.Type == ast.INTEGER {
 		i.envSetValue(fuckStmt.Name, &environment.Integer{Value: fuckStmt.Value.(int)})
 	} else if fuckStmt.Type == ast.STRING {
@@ -98,7 +104,6 @@ func (i *Interpreter) evalFuckStatementNode() {
 	} else if fuckStmt.Type == ast.LIST {
 		v := fuckStmt.Value.(ast.ListStatement)
 
-		// 列表默认值类型转换成一致的
 		for t := 0; t < v.Size; t++ {
 			if v.Type == environment.INTEGER_OBJ {
 				v.List[t] = i.toInt(v.List[t].(string))
