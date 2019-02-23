@@ -12,10 +12,10 @@ fun find => {
 
     for {
         if list[i] > max {
-            fuck max -> list[i];
+                max -> list[i];
         } else {
             if list[i] < min {
-                fuck min -> list[i];
+                min -> list[i];
             }
         }
 
@@ -23,12 +23,12 @@ fun find => {
             break;
         }
     }
+
+    print -> 'max = ';
+    printLine -> max;   # max = 99 #
+
+    print -> 'min = ';
+    printLine -> min;   # min = 2 #
 }
 
 fun -> find;
-
-print -> 'max = ';
-printLine -> max;   # max = 99 #
-
-print -> 'min = ';
-printLine -> min;   # min = 2 #

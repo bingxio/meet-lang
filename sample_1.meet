@@ -1,5 +1,5 @@
 
-import './test/sample_fibonacci.meet'
+import './test/sample_fibonacci.meet';
 
 fuck name -> ['meet' 'programming' 'language'];
 
@@ -54,4 +54,14 @@ fun do => {
 fun -> do;
 fun -> do;
 
-fun -> fibonacci;
+fun log => (content, repeat) {
+    fuck i -> 0;
+
+    while i < repeat {
+        printLine -> content;
+
+        i ++;
+    }
+}
+
+fun -> log (name[0], 5);

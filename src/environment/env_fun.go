@@ -1,8 +1,12 @@
 package environment
 
-import "bytes"
+import (
+	"bytes"
+	"meet-lang/src/ast"
+)
 
 type Fun struct {
+	Param     ast.Param
 	Establish []interface{}
 }
 
@@ -18,6 +22,10 @@ func (f *Fun) Inspect() string {
 	}
 
 	return out.String()
+}
+
+func (f *Fun) Params() ast.Param {
+	return f.Param
 }
 
 func (f *Fun) Body() []interface{} {

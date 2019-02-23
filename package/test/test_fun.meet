@@ -1,0 +1,10 @@
+
+fun log => (content, repeat) {
+    fuck i -> 0;
+
+    while i < repeat {
+        printLine -> content;
+
+        i ++;
+    }
+}

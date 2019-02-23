@@ -1,6 +1,13 @@
 
 import './package/while/sample_fibonacci.meet';
 
+import './package/test/test_fun.meet';
+
+fuck meet -> 'meet programming language !';
+
 print -> '斐波那契数列：';
 
 fun -> fibonacci;
+fun -> log (meet, 5);
+
+printLine -> i;

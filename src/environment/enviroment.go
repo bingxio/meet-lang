@@ -39,6 +39,26 @@ func (e Environment) All() map[string]Object {
 	return e.store
 }
 
+func (e *Environment) ReSetAll(oldEnv Environment) {
+	e.store = make(map[string]Object) // set new map and copy old.
+
+	for oldK, oldV := range oldEnv.All() {
+		e.store[oldK] = oldV
+	}
+}
+
+func (e Environment) DeepCopy(value map[string]Object) Environment {
+	newMap := make(map[string]Object)
+
+	for k, v := range value {
+		newMap[k] = v
+	}
+
+	return Environment{
+		store: newMap,
+	}
+}
+
 // --------- Object Interface ---------
 
 type Object interface {

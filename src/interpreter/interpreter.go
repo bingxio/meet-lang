@@ -7,6 +7,7 @@ import (
 	"meet-lang/src/token"
 	"regexp"
 	"strconv"
+	"sync"
 )
 
 type Interpreter struct {
@@ -16,7 +17,9 @@ type Interpreter struct {
 	current int
 	length  int
 
-	breakForStatement bool
+	isBreakForStatement bool
+
+	oldEnv environment.Environment
 }
 
 func Eval(ast *ast.Program, env *environment.Environment) {
@@ -25,7 +28,7 @@ func Eval(ast *ast.Program, env *environment.Environment) {
 		env:     *env,
 		current: 0,
 
-		breakForStatement: true,
+		isBreakForStatement: true,
 	}
 	i.eval()
 }
@@ -65,6 +68,8 @@ func (i *Interpreter) evalForNode(node interface{}) {
 		i.evalForStatement()
 	case ast.FunStatement:
 		i.evalFunStatement()
+	case ast.ReFuckStatement:
+		i.evalReFuckStatement()
 	default:
 		panic("解释失败，未知类型")
 	}
@@ -300,6 +305,14 @@ func (i *Interpreter) evalSetStatementNode() {
 		Values: l.Items(),
 	})
 
+	if _, ok := i.env.Get(listName); !ok {
+		i.oldEnv.Set(listName, &environment.List{
+			Types:  l.Types,
+			Size:   l.Size,
+			Values: l.Items(),
+		})
+	}
+
 	i.current++
 }
 
@@ -307,12 +320,21 @@ func (i *Interpreter) evalMinusOnePlusOneStatementNode() {
 	minusOnePlusOneStmt := i.node.(ast.MinusOnePlusOneStatement)
 
 	if v := i.envGetVariable(minusOnePlusOneStmt.Name); v.Type() == environment.INTEGER_OBJ {
-		i := v.(*environment.Integer)
+		v := v.(*environment.Integer)
 
 		if minusOnePlusOneStmt.Type == ast.PLUS_ONE {
-			i.Value++
+			v.Value++
+
+			// 如果目前的作用域没有，就是全局变量
+			if _, ok := i.env.Get(minusOnePlusOneStmt.Name); !ok {
+				i.oldEnv.Set(minusOnePlusOneStmt.Name, v)
+			}
 		} else {
-			i.Value--
+			v.Value--
+
+			if _, ok := i.env.Get(minusOnePlusOneStmt.Name); !ok {
+				i.oldEnv.Set(minusOnePlusOneStmt.Name, v)
+			}
 		}
 	} else {
 		panic("位加位减操作只能对整型运算：" + v.Type())
@@ -324,10 +346,10 @@ func (i *Interpreter) evalMinusOnePlusOneStatementNode() {
 func (i *Interpreter) evalIfStatementNode() {
 	ifStmt := i.node.(ast.IfStatement)
 
+	tempCurrent := i.current
+
 	condition := i.evalConditionStatement(ifStmt.Condition)
 	_, v := i.evalBinaryExpressionNode(*condition)
-
-	tempCurrent := i.current
 
 	if v.(bool) {
 		for _, v := range ifStmt.Establish {
@@ -351,10 +373,10 @@ func (i *Interpreter) evalIfStatementNode() {
 func (i *Interpreter) evalWhileStatementNode() {
 	whileStmt := i.node.(ast.WhileStatement)
 
+	tempCurrent := i.current
+
 	condition := i.evalConditionStatement(whileStmt.Condition)
 	_, v := i.evalBinaryExpressionNode(*condition)
-
-	tempCurrent := i.current
 
 	for v.(bool) {
 		for _, n := range whileStmt.Establish {
@@ -372,7 +394,7 @@ func (i *Interpreter) evalWhileStatementNode() {
 }
 
 func (i *Interpreter) evalBreakStatement() {
-	i.breakForStatement = false
+	i.isBreakForStatement = false
 
 	i.current++
 }
@@ -382,14 +404,14 @@ func (i *Interpreter) evalForStatement() {
 
 	tempCurrent := i.current
 
-	for i.breakForStatement {
+	for i.isBreakForStatement {
 		for _, n := range forStmt.Establish {
 			i.node = n
 			i.evalForNode(i.node)
 		}
 	}
 
-	i.breakForStatement = true
+	i.isBreakForStatement = true
 
 	i.current = tempCurrent
 	i.current++
@@ -400,20 +422,111 @@ func (i *Interpreter) evalFunStatement() {
 
 	if funStmt.Type == ast.DEFINE_FUN {
 		i.env.Set(funStmt.Name, &environment.Fun{
+			Param:     funStmt.Param,
 			Establish: funStmt.Establish,
 		})
-	} else {
+	} else if funStmt.Type == ast.CALL_FUN {
 		tempCurrent := i.current
 
+		i.oldEnv = i.env.DeepCopy(i.env.All())
+
 		v := i.envGetVariable(funStmt.Name)
-		f := v.(*environment.Fun)
+		f := v.(*environment.Fun) // saved main function.
+
+		if f.Param.Count != funStmt.Param.Count {
+			panic("函数参数有误，参数个数：" + strconv.Itoa(funStmt.Param.Count) +
+				"，应有个数：" + strconv.Itoa(f.Param.Count))
+		}
+
+		if f.Param.Count != 0 && f.Param.Count == funStmt.Param.Count {
+			for idx, val := range funStmt.Param.ParamItem {
+				name := f.Param.ParamItem[idx].Value.(string)
+				value, _ := strconv.Atoi(val.Value.(string)) // default string to int value.
+
+				if val.Type == token.DIGIT {
+					i.env.Set(name, &environment.Integer{
+						Value: value,
+					})
+				} else if val.Type == token.STRING {
+					i.env.Set(name, &environment.String{
+						Value: val.Value.(string),
+					})
+				} else if val.Type == token.NAME {
+					if v := i.envGetVariable(val.Value.(string)); v.Type() == environment.INTEGER_OBJ {
+						i.env.Set(name, &environment.Integer{
+							Value: v.(*environment.Integer).Value,
+						})
+					} else if v.Type() == environment.STRING_OBJ {
+						i.env.Set(name, &environment.String{
+							Value: v.(*environment.String).Value,
+						})
+					}
+				} else if val.Type == token.LIST {
+					_, _, types, _, value := i.evalListExpression(val.Value.(string))
+
+					if types == environment.INTEGER_OBJ {
+						i.env.Set(name, &environment.Integer{
+							Value: value.(int),
+						})
+					} else if types == environment.STRING_OBJ {
+						i.env.Set(name, &environment.String{
+							Value: value.(string),
+						})
+					}
+				}
+			}
+		}
 
 		for _, v := range f.Body() {
 			i.node = v
 			i.evalForNode(i.node)
 		}
 
+		i.env.ReSetAll(i.oldEnv)
+
 		i.current = tempCurrent
+	}
+
+	i.current++
+}
+
+func (i *Interpreter) evalReFuckStatement() {
+	reFuckStmt := i.node.(ast.ReFuckStatement)
+
+	if reFuckStmt.Type == ast.INTEGER {
+		i.env.Set(reFuckStmt.Name, &environment.Integer{
+			Value: reFuckStmt.Value.(int),
+		})
+
+		i.oldEnv.Set(reFuckStmt.Name, &environment.Integer{
+			Value: reFuckStmt.Value.(int),
+		})
+		// if _, ok := i.env.Get(reFuckStmt.Name); !ok {
+
+		// }
+	} else if reFuckStmt.Type == ast.STRING {
+		i.env.Set(reFuckStmt.Name, &environment.String{
+			Value: reFuckStmt.Value.(string),
+		})
+
+		i.oldEnv.Set(reFuckStmt.Name, &environment.String{
+			Value: reFuckStmt.Value.(string),
+		})
+		// if _, ok := i.env.Get(reFuckStmt.Name); !ok {
+
+		// }
+	} else if reFuckStmt.Type == ast.FUCK_LIST {
+		_, _, types, _, value := i.evalListExpression(reFuckStmt.Value.(string))
+
+		if types == environment.INTEGER_OBJ {
+			i.env.Set(reFuckStmt.Name, &environment.Integer{
+				Value: value.(int),
+			})
+		} else if types == environment.STRING_OBJ {
+			i.env.Set(reFuckStmt.Name, &environment.String{
+				Value: value.(string),
+			})
+		}
 	}
 
 	i.current++
@@ -423,7 +536,7 @@ func (i Interpreter) evalConditionStatement(conditionArr []interface{}) *ast.Bin
 	condition := ast.BinaryExpressionStatement{}
 
 	if len(conditionArr) > 3 {
-		panic("操作数不能大于 3 个：" + string(len(conditionArr)))
+		panic("操作数不能大于 3 个：" + strconv.Itoa(len(conditionArr)))
 	}
 
 	switch conditionArr[0].(type) {
@@ -642,6 +755,12 @@ func (i Interpreter) toInt(value string) int {
 	v, _ := strconv.Atoi(value)
 
 	return v
+}
+
+func (i Interpreter) doOnce(do func()) {
+	var once sync.Once
+
+	once.Do(do)
 }
 
 func (i Interpreter) plus(leftT, rightT string, left, right interface{}) (string, interface{}) {

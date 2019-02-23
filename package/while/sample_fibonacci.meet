@@ -7,7 +7,7 @@ fuck a -> 1;
 fuck b -> 20;
     
 fun do => {
-  
+
     while (a += 1) < b {
         fuck c -> (a - 1);
         fuck d -> (a - 2);

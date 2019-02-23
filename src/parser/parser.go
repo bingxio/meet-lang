@@ -63,10 +63,11 @@ func (p *Parser) parseWithToken(statements *[]interface{}) {
 	case "fun":
 		*statements = append(*statements, *p.parseFunStatement())
 	default:
-		// a ++; a --;
 		if p.token.Type == token.NAME && p.tokens[p.current+1].Type == token.MINUS_ONE ||
 			p.tokens[p.current+1].Type == token.PLUS_ONE {
 			*statements = append(*statements, *p.parseMinusOnePlusOneStatement())
+		} else if p.token.Type == token.NAME && p.tokens[p.current+1].Type == token.POINTER {
+			*statements = append(*statements, *p.parseReFuckStatement())
 		} else {
 			panic("未知的类型：" + p.token.Type + ", " + p.token.Value)
 		}
@@ -107,6 +108,32 @@ func (p *Parser) parseBlockStatement(ast []interface{}) *[]interface{} {
 	p.refreshCurrentToken() // refresh token '}' to next token.
 
 	return &ast
+}
+
+func (p *Parser) parseParamsStatement() *ast.Param {
+	params := &ast.Param{}
+
+	for p.currentToken().Type != token.RPAREN {
+		if p.currentToken().Type == token.COMMA {
+			p.current++
+			continue
+		}
+
+		params.ParamItem = append(params.ParamItem, ast.ParamItem{
+			Type:  p.currentToken().Type,
+			Value: p.currentToken().Value,
+		})
+
+		p.current++
+		p.refreshCurrentToken()
+	}
+
+	p.current++
+	p.refreshCurrentToken() // skip ')'
+
+	params.Count = len(params.ParamItem)
+
+	return params
 }
 
 // import 'sample_package.meet' as sample;
@@ -569,32 +596,41 @@ func (p *Parser) parseBinaryExpressionStatement() *ast.BinaryExpressionStatement
 	return binaryExpressionStatement
 }
 
-// fun a => {
+// fun a => (a, b) {
 // 	printLine -> a;
 // }
 //
-// fun -> a;
+// fun -> a (12, 20);
 func (p *Parser) parseFunStatement() *ast.FunStatement {
 	funStmt := &ast.FunStatement{}
 
 	p.current++
 	p.refreshCurrentToken()
 
-	if p.currentToken().Value != "->" {
+	if p.currentToken().Type != token.POINTER {
 		p.isLetter(p.currentToken())
 
 		funStmt.Name = p.currentToken().Value
 
 		p.current++
 
-		if p.isToken("=>") {
+		if p.currentToken().Type == token.FUNCTION_POINTER {
 			p.current++
+
+			if p.currentToken().Type == token.LPAREN {
+				p.current++ // skip '('
+
+				funStmt.Param = *p.parseParamsStatement()
+			}
+
 			p.isLBrace()
 			p.current++
 			p.refreshCurrentToken()
 
 			funStmt.Type = ast.DEFINE_FUN
 			funStmt.Establish = *p.parseBlockStatement(funStmt.Establish)
+		} else {
+			panic("缺少函数指针：" + p.currentToken().Value)
 		}
 
 		return funStmt
@@ -603,16 +639,57 @@ func (p *Parser) parseFunStatement() *ast.FunStatement {
 		p.current++
 		p.isLetter(p.currentToken())
 
-		funStmt.Type = ast.CALL_FUN
 		funStmt.Name = p.currentToken().Value
 
 		p.current++
+
+		if p.currentToken().Type == token.LPAREN {
+			p.current++ // skip '('
+
+			funStmt.Param = *p.parseParamsStatement()
+			funStmt.Type = ast.CALL_FUN
+
+			p.isSemicolon()
+			p.current++
+			p.refreshCurrentToken()
+
+			return funStmt
+		}
+
+		funStmt.Type = ast.CALL_FUN
+
+		p.refreshCurrentToken()
 		p.isSemicolon()
 		p.current++
 		p.refreshCurrentToken()
 	}
 
 	return funStmt
+}
+
+// a -> 20;
+func (p *Parser) parseReFuckStatement() *ast.ReFuckStatement {
+	reFuckStmt := &ast.ReFuckStatement{}
+
+	p.isLetter(p.currentToken())
+
+	reFuckStmt.Name = p.currentToken().Value
+
+	p.current++
+	p.isPointer()
+	p.current++
+
+	types, value := p.parseExpressionStatement()
+
+	reFuckStmt.Type = types
+	reFuckStmt.Value = value
+
+	p.current++
+	p.isSemicolon()
+	p.current++
+	p.refreshCurrentToken()
+
+	return reFuckStmt
 }
 
 // -------------------------------------------

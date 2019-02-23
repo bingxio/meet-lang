@@ -5,8 +5,51 @@ fun do => {
     print -> 'this is call function, a = ';
     printLine -> a;
 
-    fuck a -> 50;
+    a -> 50;
 }
 
 fun -> do;
 fun -> do;
+
+fun sample => (a b) {
+    printLine -> a;
+    printLine -> b;
+}
+
+fun -> sample (12 20);
+
+printLine -> a;
+
+####################
+
+fuck a -> 0;
+
+while a < 5 {
+    print -> '=';
+
+    a ++;
+}
+
+printLine;
+
+fun string => (a) {
+    printLine -> a;
+}
+
+fuck meet -> 'hello, meet programming language !';
+
+fun -> string (meet);
+
+####################
+
+fun test => {
+    fuck a -> 20;
+
+    a ++;
+
+    printLine -> a;
+}
+
+fun -> test;
+
+printLine -> a;

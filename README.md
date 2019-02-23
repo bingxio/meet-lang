@@ -260,9 +260,26 @@ fun do => {
 fun -> do;
 fun -> do;
 
+fun log => (content, repeat) {
+    fuck i -> 0;
+
+    while i < repeat {
+        printLine -> content;
+
+        i ++;
+    }
+}
+
+fun -> log ('hello', 5);
+
 Output:
 this is call function, a = 20
 this is call function, a = 50
+hello
+hello
+hello
+hello
+hello
 ```
 
 ### Magic Identifier
