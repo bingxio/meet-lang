@@ -11,7 +11,7 @@ This is a interpreter, it took me two days to write this project, just for fun !
 
 This repo is writing by golang, The JavaScript version is here: [meet-lang-node](https://github.com/Turaiiao/meet-lang-node)
 
-You can see the summary here: [Turaiiao's Blog](https://blog.xyiio.cn/2019/02/15/2019-02-15/)
+You can see the summary here: [Turaiiao's Blog](https://blog.xyiio.cn/)
 
 ### Run
 
@@ -175,6 +175,8 @@ max is b, oh, plus 30 to equal b.
 ```
 
 ### Loop statement
+
+Of course, you can also use the break keyword for program exit.
 ```
 fuck tom -> 0;
 fuck frank -> 50;

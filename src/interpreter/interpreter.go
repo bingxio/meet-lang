@@ -347,7 +347,7 @@ func (i *Interpreter) evalWhileStatementNode() {
 	condition := i.evalConditionStatement(whileStmt.Condition)
 	_, v := i.evalBinaryExpressionNode(*condition)
 
-	for v.(bool) {
+	for v.(bool) && i.isBreakForStatement {
 		for _, n := range whileStmt.Establish {
 			i.node = n
 			i.evalForNode(i.node)
@@ -356,6 +356,8 @@ func (i *Interpreter) evalWhileStatementNode() {
 		condition = i.evalConditionStatement(whileStmt.Condition)
 		_, v = i.evalBinaryExpressionNode(*condition)
 	}
+
+	i.isBreakForStatement = true
 
 	i.current = tempCurrent
 
