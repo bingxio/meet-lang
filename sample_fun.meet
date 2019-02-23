@@ -1,4 +1,13 @@
 
+#
+    进入函数作用域的时候，如果有形式参数，操作如下：
+
+    1.先判断全局符号表有没有和形参名相同的变量
+    2.如果有，备份全局符号表里和形参名相同的变量，把全局符号表里添加形参变量
+    3.作用域结束，删除包含函数形参的变量，把备份的原参数复制到全局符号表
+    4.函数里定义的变量均为动态作用域
+#
+
 fuck a -> 20;
 
 fun do => {
@@ -8,48 +17,29 @@ fun do => {
     a -> 50;
 }
 
-fun -> do;
-fun -> do;
+fun -> do; # this is call function, a = 20 #
+fun -> do; # this is call function, a = 50 #
 
 fun sample => (a b) {
-    printLine -> a;
-    printLine -> b;
+    print -> a;
+    print -> ' : ';
+    printLine -> b; # 12 ： 20 #
 }
+
+###################|#############
 
 fun -> sample (12 20);
 
-printLine -> a;
+printLine -> a; # 50 #
 
 ####################
 
-fuck a -> 0;
+fuck content -> 'hello';
 
-while a < 5 {
-    print -> '=';
-
-    a ++;
+fun log => (content) {
+    printLine -> content; # meet programming language ! #
 }
 
-printLine;
+fun -> log ('meet programming language !');
 
-fun string => (a) {
-    printLine -> a;
-}
-
-fuck meet -> 'hello, meet programming language !';
-
-fun -> string (meet);
-
-####################
-
-fun test => {
-    fuck a -> 20;
-
-    a ++;
-
-    printLine -> a;
-}
-
-fun -> test;
-
-printLine -> a;
+printLine -> content; # hello #

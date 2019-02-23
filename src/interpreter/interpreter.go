@@ -19,7 +19,7 @@ type Interpreter struct {
 
 	isBreakForStatement bool
 
-	oldEnv environment.Environment
+	backUpEnv *environment.Environment
 }
 
 func Eval(ast *ast.Program, env *environment.Environment) {
@@ -92,13 +92,9 @@ func (i *Interpreter) evalFuckStatementNode() {
 	fuckStmt := i.node.(ast.FuckStatement)
 
 	if fuckStmt.Type == ast.INTEGER {
-		i.env.Set(fuckStmt.Name, &environment.Integer{
-			Value: fuckStmt.Value.(int),
-		})
+		i.envSetValue(fuckStmt.Name, &environment.Integer{Value: fuckStmt.Value.(int)})
 	} else if fuckStmt.Type == ast.STRING {
-		i.env.Set(fuckStmt.Name, &environment.String{
-			Value: fuckStmt.Value.(string),
-		})
+		i.envSetValue(fuckStmt.Name, &environment.String{Value: fuckStmt.Value.(string)})
 	} else if fuckStmt.Type == ast.LIST {
 		v := fuckStmt.Value.(ast.ListStatement)
 
@@ -117,7 +113,7 @@ func (i *Interpreter) evalFuckStatementNode() {
 			}
 		}
 
-		i.env.Set(fuckStmt.Name, &environment.List{
+		i.envSetValue(fuckStmt.Name, &environment.List{
 			Types:  v.Type,
 			Size:   v.Size,
 			Values: v.List,
@@ -126,29 +122,19 @@ func (i *Interpreter) evalFuckStatementNode() {
 		t, v := i.evalBinaryExpressionNode(fuckStmt.Value.(ast.BinaryExpressionStatement))
 
 		if t == ast.STRING {
-			i.env.Set(fuckStmt.Name, &environment.String{
-				Value: v.(string),
-			})
+			i.envSetValue(fuckStmt.Name, &environment.String{Value: v.(string)})
 		} else if t == ast.INTEGER {
-			i.env.Set(fuckStmt.Name, &environment.Integer{
-				Value: v.(int),
-			})
+			i.envSetValue(fuckStmt.Name, &environment.Integer{Value: v.(int)})
 		} else if t == ast.BOOL {
-			i.env.Set(fuckStmt.Name, &environment.Bool{
-				State: v.(bool),
-			})
+			i.envSetValue(fuckStmt.Name, &environment.Bool{State: v.(bool)})
 		}
 	} else if fuckStmt.Type == ast.FUCK_LIST {
 		_, _, t, _, v := i.evalListExpression(fuckStmt.Value.(string))
 
 		if t == environment.INTEGER_OBJ {
-			i.env.Set(fuckStmt.Name, &environment.Integer{
-				Value: v.(int),
-			})
+			i.envSetValue(fuckStmt.Name, &environment.Integer{Value: v.(int)})
 		} else if t == environment.STRING_OBJ {
-			i.env.Set(fuckStmt.Name, &environment.String{
-				Value: v.(string),
-			})
+			i.envSetValue(fuckStmt.Name, &environment.String{Value: v.(string)})
 		}
 	}
 
@@ -305,14 +291,6 @@ func (i *Interpreter) evalSetStatementNode() {
 		Values: l.Items(),
 	})
 
-	if _, ok := i.env.Get(listName); !ok {
-		i.oldEnv.Set(listName, &environment.List{
-			Types:  l.Types,
-			Size:   l.Size,
-			Values: l.Items(),
-		})
-	}
-
 	i.current++
 }
 
@@ -324,17 +302,8 @@ func (i *Interpreter) evalMinusOnePlusOneStatementNode() {
 
 		if minusOnePlusOneStmt.Type == ast.PLUS_ONE {
 			v.Value++
-
-			// 如果目前的作用域没有，就是全局变量
-			if _, ok := i.env.Get(minusOnePlusOneStmt.Name); !ok {
-				i.oldEnv.Set(minusOnePlusOneStmt.Name, v)
-			}
 		} else {
 			v.Value--
-
-			if _, ok := i.env.Get(minusOnePlusOneStmt.Name); !ok {
-				i.oldEnv.Set(minusOnePlusOneStmt.Name, v)
-			}
 		}
 	} else {
 		panic("位加位减操作只能对整型运算：" + v.Type())
@@ -420,15 +389,19 @@ func (i *Interpreter) evalForStatement() {
 func (i *Interpreter) evalFunStatement() {
 	funStmt := i.node.(ast.FunStatement)
 
+	i.backUpEnv = environment.NewEnvironment()
+
 	if funStmt.Type == ast.DEFINE_FUN {
+		if _, ok := i.env.Get(funStmt.Name); ok {
+			panic("函数名不能和变量重名或函数重名")
+		}
+
 		i.env.Set(funStmt.Name, &environment.Fun{
 			Param:     funStmt.Param,
 			Establish: funStmt.Establish,
 		})
 	} else if funStmt.Type == ast.CALL_FUN {
 		tempCurrent := i.current
-
-		i.oldEnv = i.env.DeepCopy(i.env.All())
 
 		v := i.envGetVariable(funStmt.Name)
 		f := v.(*environment.Fun) // saved main function.
@@ -440,38 +413,30 @@ func (i *Interpreter) evalFunStatement() {
 
 		if f.Param.Count != 0 && f.Param.Count == funStmt.Param.Count {
 			for idx, val := range funStmt.Param.ParamItem {
-				name := f.Param.ParamItem[idx].Value.(string)
-				value, _ := strconv.Atoi(val.Value.(string)) // default string to int value.
+				name := f.Param.ParamItem[idx].Value.(string) // params.
+				value, _ := strconv.Atoi(val.Value.(string))  // default string to int value.
+
+				if v, has := i.env.Get(name); has {
+					i.envBackUpSetValue(name, v)
+				}
 
 				if val.Type == token.DIGIT {
-					i.env.Set(name, &environment.Integer{
-						Value: value,
-					})
+					i.envSetValue(name, &environment.Integer{Value: value})
 				} else if val.Type == token.STRING {
-					i.env.Set(name, &environment.String{
-						Value: val.Value.(string),
-					})
+					i.envSetValue(name, &environment.String{Value: val.Value.(string)})
 				} else if val.Type == token.NAME {
 					if v := i.envGetVariable(val.Value.(string)); v.Type() == environment.INTEGER_OBJ {
-						i.env.Set(name, &environment.Integer{
-							Value: v.(*environment.Integer).Value,
-						})
+						i.envSetValue(name, &environment.Integer{Value: v.(*environment.Integer).Value})
 					} else if v.Type() == environment.STRING_OBJ {
-						i.env.Set(name, &environment.String{
-							Value: v.(*environment.String).Value,
-						})
+						i.envSetValue(name, &environment.String{Value: v.(*environment.String).Value})
 					}
 				} else if val.Type == token.LIST {
 					_, _, types, _, value := i.evalListExpression(val.Value.(string))
 
 					if types == environment.INTEGER_OBJ {
-						i.env.Set(name, &environment.Integer{
-							Value: value.(int),
-						})
+						i.envSetValue(name, &environment.Integer{Value: value.(int)})
 					} else if types == environment.STRING_OBJ {
-						i.env.Set(name, &environment.String{
-							Value: value.(string),
-						})
+						i.envSetValue(name, &environment.String{Value: value.(string)})
 					}
 				}
 			}
@@ -482,10 +447,12 @@ func (i *Interpreter) evalFunStatement() {
 			i.evalForNode(i.node)
 		}
 
-		i.env.ReSetAll(i.oldEnv)
+		i.env.FilterDeleteAndPushAll(f.Param, i.backUpEnv)
 
 		i.current = tempCurrent
 	}
+
+	i.backUpEnv.ClearAll()
 
 	i.current++
 }
@@ -494,38 +461,16 @@ func (i *Interpreter) evalReFuckStatement() {
 	reFuckStmt := i.node.(ast.ReFuckStatement)
 
 	if reFuckStmt.Type == ast.INTEGER {
-		i.env.Set(reFuckStmt.Name, &environment.Integer{
-			Value: reFuckStmt.Value.(int),
-		})
-
-		i.oldEnv.Set(reFuckStmt.Name, &environment.Integer{
-			Value: reFuckStmt.Value.(int),
-		})
-		// if _, ok := i.env.Get(reFuckStmt.Name); !ok {
-
-		// }
+		i.envSetValue(reFuckStmt.Name, &environment.Integer{Value: reFuckStmt.Value.(int)})
 	} else if reFuckStmt.Type == ast.STRING {
-		i.env.Set(reFuckStmt.Name, &environment.String{
-			Value: reFuckStmt.Value.(string),
-		})
-
-		i.oldEnv.Set(reFuckStmt.Name, &environment.String{
-			Value: reFuckStmt.Value.(string),
-		})
-		// if _, ok := i.env.Get(reFuckStmt.Name); !ok {
-
-		// }
+		i.envSetValue(reFuckStmt.Name, &environment.String{Value: reFuckStmt.Value.(string)})
 	} else if reFuckStmt.Type == ast.FUCK_LIST {
 		_, _, types, _, value := i.evalListExpression(reFuckStmt.Value.(string))
 
 		if types == environment.INTEGER_OBJ {
-			i.env.Set(reFuckStmt.Name, &environment.Integer{
-				Value: value.(int),
-			})
+			i.envSetValue(reFuckStmt.Name, &environment.Integer{Value: value.(int)})
 		} else if types == environment.STRING_OBJ {
-			i.env.Set(reFuckStmt.Name, &environment.String{
-				Value: value.(string),
-			})
+			i.envSetValue(reFuckStmt.Name, &environment.String{Value: value.(string)})
 		}
 	}
 
@@ -546,9 +491,7 @@ func (i Interpreter) evalConditionStatement(conditionArr []interface{}) *ast.Bin
 
 		if exp.Operator.Type == token.PLUS_ASSIGN || exp.Operator.Type == token.MINUS_ASSIGN ||
 			exp.Operator.Type == token.ASTERISK_ASSIGN || exp.Operator.Type == token.DIV_ASSIGN {
-			i.env.Set(exp.Left.Value, &environment.Integer{
-				Value: value.(int),
-			})
+			i.envSetValue(exp.Left.Value, &environment.Integer{Value: value.(int)})
 		}
 
 		condition.Left = token.Token{
@@ -587,6 +530,14 @@ func (i Interpreter) evalConditionStatement(conditionArr []interface{}) *ast.Bin
 	default:
 		panic("未知的条件表达式")
 	}
+}
+
+func (i Interpreter) envSetValue(name string, object environment.Object) {
+	i.env.Set(name, object)
+}
+
+func (i Interpreter) envBackUpSetValue(name string, object environment.Object) {
+	i.backUpEnv.Set(name, object)
 }
 
 func (i Interpreter) envGetVariable(name string) environment.Object {

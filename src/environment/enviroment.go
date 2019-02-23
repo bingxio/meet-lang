@@ -1,5 +1,9 @@
 package environment
 
+import (
+	"meet-lang/src/ast"
+)
+
 const (
 	INTEGER_OBJ = "INTEGER"
 	STRING_OBJ  = "STRING"
@@ -45,6 +49,20 @@ func (e *Environment) ReSetAll(oldEnv Environment) {
 	for oldK, oldV := range oldEnv.All() {
 		e.store[oldK] = oldV
 	}
+}
+
+func (e *Environment) FilterDeleteAndPushAll(param ast.Param, backUpEnv *Environment) {
+	for _, v := range param.ParamItem {
+		delete(e.store, v.Value.(string))
+	}
+
+	for k, v := range backUpEnv.All() {
+		e.store[k] = v
+	}
+}
+
+func (e *Environment) ClearAll() {
+	e.store = make(map[string]Object)
 }
 
 func (e Environment) DeepCopy(value map[string]Object) Environment {
