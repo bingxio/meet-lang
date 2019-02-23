@@ -137,9 +137,9 @@ printLine -> a;
 printLine -> list[4];   # 10 #
 printLine -> listPlus;  # 18 #
 
-fuck a -> 0;
+fuck b -> 0;
 
-printLine -> list[a];
+printLine -> list[b];
 
 Output:
 2 4 6 8 10 
@@ -256,7 +256,7 @@ fun do => {
     print -> 'this is call function, a = ';
     printLine -> a;
 
-    fuck a -> 50;
+    a -> 50;
 }
 
 fun -> do;

@@ -1,5 +1,5 @@
 
-import './test/sample_fibonacci.meet';
+# import './test/sample_fibonacci.meet'; #
 
 fuck name -> ['meet' 'programming' 'language'];
 
@@ -19,7 +19,7 @@ printLine 1;
 fuck index -> (0 - 1);
 
 # Reassign #
-fuck list -> ['h' 'e' 'l' 'l' 'o'];
+list -> ['h' 'e' 'l' 'l' 'o'];
 
 while (index += 1) <= 4 {
     print index;
@@ -42,13 +42,13 @@ for {
     }
 }
 
-fuck a -> 20;
+a -> 20;
 
 fun do => {
     print -> 'this is call function, a = ';
     printLine -> a;
 
-    fuck a -> 50;
+    a -> 50;
 }
 
 fun -> do;
